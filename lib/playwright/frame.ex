@@ -769,6 +769,23 @@ defmodule Playwright.Frame do
   end
 
   @doc """
+  Returns `Playwright.ElementHandle.content/1`
+
+  ## Returns
+
+    - `binary() | nil`
+
+  ## Arguments
+
+  | key/name | type   |             | description |
+  | ---------- | ------ | ----------- | ----------- |
+  """
+  @spec content(t()) :: binary() | nil
+  def content(%Frame{session: session} = frame) do
+    Channel.post(session, {:guid, frame.guid}, :content)
+  end
+
+  @doc """
   Returns the page title.
 
   ## Returns

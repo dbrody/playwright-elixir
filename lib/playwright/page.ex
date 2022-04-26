@@ -502,6 +502,11 @@ defmodule Playwright.Page do
     main_frame(page) |> Frame.text_content(selector, options)
   end
 
+  @spec content(t()) :: binary() | nil
+  def content(%Page{} = page) do
+    main_frame(page) |> Frame.content()
+  end
+
   @spec title(t()) :: binary()
   def title(%Page{} = page) do
     main_frame(page) |> Frame.title()

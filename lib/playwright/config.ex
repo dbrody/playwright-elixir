@@ -228,6 +228,7 @@ defmodule Playwright.Config do
         :downloads_path,
         :executable_path,
         :headless,
+        :proxy,
         :playwright_cli_path
       ]
     end
