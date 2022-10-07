@@ -4,13 +4,15 @@ defmodule Playwright.Locator do
   It captures the logic sufficient to retrieve the element at any given moment.
   `Locator` can be created with the `Playwright.Locator.new/2` function.
 
+  See also `Playwright.Page.locator/2`.
+
   ## Example
 
-      locator = Page.Locator.new(page, "a#exists")
-      Locator.click(locator)
+      locator = Playwright.Locator.new(page, "a#exists")
+      Playwright.Locator.click(locator)
 
-  The difference between the `Locator` and `Playwright.ElementHandle`
-  is that the latter points to a particular element, while `Locator` captures
+  The difference between the `Playwright.Locator` and `Playwright.ElementHandle`
+  is that the latter points to a particular element, while `Playwright.Locator` captures
   the logic of how to retrieve that element.
 
   ## ElementHandle Example
@@ -30,9 +32,9 @@ defmodule Playwright.Locator do
   located in the page using the selector. So in the snippet below, underlying
   DOM element is going to be located twice.
 
-      locator = Page.Locator.new(page, "a#exists")
-      :ok = Page.Locator.hover(locator)
-      :ok = Page.Locator.click(locator)
+      locator = Playwright.Locator.new(page, "a#exists")
+      :ok = Playwright.Locator.hover(locator)
+      :ok = Playwright.Locator.click(locator)
 
   ## Strictness
 
@@ -40,7 +42,7 @@ defmodule Playwright.Locator do
   some target DOM element will throw if more than one element matches given
   selector.
 
-      alias Page.Locator
+      alias Playwright.Locator
       locator = Locator.new(page, "button")
 
       # Throws if there are several buttons in DOM:
@@ -65,11 +67,12 @@ defmodule Playwright.Locator do
 
   @type options() :: %{optional(:timeout) => non_neg_integer()}
 
-  @type options_with_delay() :: %{
-    optional(:delay) => non_neg_integer(),
-    optional(:no_wait_after) => boolean(),
-    optional(:timeout) => non_neg_integer()
-  }
+
+  @type options_keyboard() :: %{
+          optional(:delay) => non_neg_integer(),
+          optional(:no_wait_after) => boolean(),
+          optional(:timeout) => non_neg_integer()
+        }
 
   @type options_position() :: %{
           optional(:x) => number(),
@@ -865,7 +868,7 @@ defmodule Playwright.Locator do
   | `:no_wait_after` | option | `boolean()`     | Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. `(default: false)` |
   | `:timeout`       | option | `number()`      | Maximum time in milliseconds. Pass `0` to disable timeout. The default value can be changed by using the `Playwright.BrowserContext.set_default_timeout/2` or `Playwright.Page.set_default_timeout/2` functions. `(default: 30 seconds)` |
   """
-  @spec press(t(), binary(), options_with_delay()) :: :ok
+  @spec press(t(), binary(), options_keyboard()) :: :ok
   def press(%Locator{} = locator, key, options \\ %{}) do
     options = Map.merge(options, %{strict: true})
     Frame.press(locator.frame, locator.selector, key, options)
@@ -932,7 +935,8 @@ defmodule Playwright.Locator do
   Triggers a change and input event once all the provided options have been selected.
 
   ## Example
-      locator = Page.locator(page, "select#colors")
+      alias Playwright.Locator
+      locator = Locator.new(page, "select#colors")
 
       # single selection matching the value
       Locator.select_option(locator, "blue")
@@ -1079,7 +1083,7 @@ defmodule Playwright.Locator do
       `option: no_wait_after` is set.
 
   If the element is detached from the DOM at any moment during the action,
-  throws an erro.
+  throws an error.
 
   When all steps combined have not finished during the specified timeout,
   throws a `TimeoutError`. Passing `0` timeout disables this.
@@ -1136,7 +1140,7 @@ defmodule Playwright.Locator do
   | `:no_wait_after` | option | `boolean()` | Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. `(default: false)` |
   | `:timeout`       | option | `number()`  | Maximum time in milliseconds. Pass `0` to disable timeout. The default value can be changed via `Playwright.BrowserContext.set_default_timeout/2` or `Playwright.Page.set_default_timeout/2`. `(default: 30 seconds)` |
   """
-  @spec type(t(), binary(), options_with_delay()) :: :ok
+  @spec type(t(), binary(), options_keyboard()) :: :ok
   def type(%Locator{} = locator, text, options \\ %{}) do
     options = Map.merge(options, %{strict: true})
     Frame.type(locator.frame, locator.selector, text, options)
@@ -1185,6 +1189,22 @@ defmodule Playwright.Locator do
   If target element already satisfies the condition, the method returns
   immediately. Otherwise, waits for up to `option: timeout` milliseconds until
   the condition is met.
+
+  ## Options
+
+  | key/name   | type   |              | description |
+  | ---------- | ------ | ------------ | ----------- |
+  | `:state`   | option | state option | Defaults to `visible`. See "state options" below" |
+  | `:timeout` | option | float        | Maximum time in milliseconds, defaults to 30 seconds, pass 0 to disable timeout. The default value can be changed by using the browser_context.set_default_timeout(timeout) or page.set_default_timeout(timeout) methods. |
+
+  ## State options
+
+  | value      | description |
+  | ---------- | ----------- |
+  | 'attached' | wait for element to be present in DOM. |
+  | 'detached' | wait for element to not be present in DOM. |
+  | 'visible'  | wait for element to have non-empty bounding box and no visibility:hidden. Note that element without any content or with display:none has an empty bounding box and is not considered visible. |
+  | 'hidden'   | wait for element to be either detached from DOM, or have an empty bounding box or visibility:hidden. This is opposite to the 'visible' option. |
   """
   @spec wait_for(t(), options()) :: :ok
   def wait_for(%Locator{} = locator, options \\ %{}) do
