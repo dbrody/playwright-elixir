@@ -36,7 +36,7 @@ defmodule Playwright.APIRequestContext do
         },
         options
       )
-    )
+    ) |> Channel.post_as(Playwright.APIResponse)
   end
 
   @spec body(t(), Playwright.APIResponse.t()) :: any()

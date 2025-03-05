@@ -27,6 +27,14 @@ defmodule Playwright.Channel do
     Catalog.put(catalog, Map.merge(owner, data))
   end
 
+  def post_as(response, type) do
+    case response do
+      :ok -> :ok
+      {:error, error} -> {:error, error}
+      response -> struct(type, response)
+    end
+  end
+
   def post(session, {:guid, guid}, message, params \\ %{}) when is_binary(guid) when is_pid(session) do
     connection = Session.connection(session)
     message = Message.new(guid, message, params)
